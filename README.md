@@ -1,27 +1,146 @@
-# StreamPlus
+# stream-plus
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.8.
+> coding typescript like java jdk8 (Optional | Stream | ...)
 
-## Development server
+===============================
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Install
+```bash
+npm install stream-plus --save
+```
 
-## Code scaffolding
+## Optional
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### get Optional
 
-## Build
+```typescript
+    import {Optional} from 'stream-plus';
+    
+    const a = null;
+    Optional.of(a); // throw error (ERROR Error: assert:optional:value can not be null)
+    
+    const b = null;
+    Optional.ofNullable(b); // it works
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+### operate Optional
+ ```typescript
+    interface ClassA {
+      chnName?: string;
+    }
 
-## Running unit tests
+    interface ClassB {
+      engName?: string;
+    }
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+    Optional.ofNullable<ClassA>({chnName: 'Tom'})
+      .map<ClassB>(item => {
+        console.log(item.chnName);
+        return {engName: item.chnName};
+      })
+      .map<string>(item => item.engName)
+      .filter(item => item.length > 2)
+      .ifPresent(item => console.log(item));
 
-## Running end-to-end tests
+    Optional.ofNullable(null)
+      .orElse({});
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+    Optional.ofNullable(null)
+      .orElseGet(() => {
+      });
 
-## Further help
+    Optional.ofNullable(null)
+      .orElseThrow((): never => {
+        throw new Error();
+      })
+    ;
+ ```  
+ 
+ ## Stream
+ 
+### get stream
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```typescript
+    import {Optional, Stream} from 'stream-plus';
+
+    Stream.of([]);
+    const s = new Stream([]);
+```
+
+### operate Stream
+
+```typescript
+    Stream.of<string>(['5', '6', '7', '1', '2'])
+          .map(item => Number(item))
+          .mapToNumber(item => item + 1)
+          .sum();
+
+    Stream.of<number[]>([
+          [2, 3],
+          [2, 3],
+          [2, 3],
+        ]).flatMap(array => Stream.of(array))
+          .mapToNumber(item => item)
+          .sum();
+    
+    Stream.of([1, 2, 3, 4])
+          .anyMatch(item => item > 2);
+    
+    // ... you can try it with npm install
+```   
+
+## API Docs
+
+### Optional
+
+#### Methods:
+- `static of<T>(value: T): Optional<T>`
+- `static empty<R>(): Optional<R>`
+- `static ofNullable<T>(value: T): Optional<T>`
+
+- `filter(predicate: (value: T) => boolean): Optional<T> `
+- `map<R>(fn: (value: T) => R): Optional<R> `
+- `get(): T `
+- `orElse(value: T): T `
+- `orElseGet(supplier: () => T): T`
+- `orElseThrow(supplier: () => void): T | void`
+- `isPresent(): boolean`
+- `ifPresent(consumer: (value: T) => void): void`
+
+### Stream
+
+#### Methods:
+- `static of<T>(value: T[]): Stream<T>`
+
+- `filter(predicate: (value: T) => boolean): Stream<T>`
+- `map<R>(fn: (value: T, index?: number, array?: T[]) => R): Stream<R>`
+- `flatMap<R>(fn: (value: T, index?: number, array?: T[]) => Stream<R>): Stream<R>`
+- `mapToNumber(fn: (value: T) => number): NumberStream`
+- `distinct(fn = (a, b) => a === b): Stream<T>`
+- `limit(maxSize: number): Stream<T>`
+- `skip(minSize: number): Stream<T>`
+- `forEach(fn: (value: T, index?: number, array?: T[]) => void): void`
+- `anyMatch(fn: (value: T, index?: number, array?: T[]) => boolean): boolean`
+- `allMatch(fn: (value: T, index?: number, array?: T[]) => boolean): boolean`
+- `noneMatch(fn: (value: T, index?: number, array?: T[]) => boolean): boolean`
+- `toArray(): T[]`
+- `reduce(fn: (previousValue: T, currentValue: T, currentIndex?: number, array?: T[]) => T, initValue?: T): Optional<T>`
+- `collectToSet(): Set<T>`
+- `findFirst(): Optional<T>`
+- `findLast(): Optional<T>`
+- `findAny(): Optional<T>`
+- `min(fn = (a, b) => a > b): Optional<T>`
+- `max(fn = (a, b) => a > b): Optional<T>`
+- `sorted(fn = (a, b) => a > b): Stream<T>`
+- `count(): number`
+
+
+
+### NumberStream extends Stream<number>
+
+#### Methods:
+- `static from(start: number, end: number): NumberStream`
+- `sum(): number`
+- `average(): number`
+- `summaryStatistics(): NumberSummaryStatistics`
+
