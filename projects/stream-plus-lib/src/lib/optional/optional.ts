@@ -36,7 +36,9 @@ export class Optional<T> {
 
   public ifPresent(consumer: (value: T) => void): void {
     Assert.nonNull(consumer, 'optional:ifPresent:consumer can not be null');
-    consumer(this.value);
+    if (this.isPresent()) {
+      consumer(this.value);
+    }
   }
 
   public filter(predicate: (value: T) => boolean): Optional<T> {
